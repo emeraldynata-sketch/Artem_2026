@@ -152,11 +152,9 @@
               <tr>
                 <th>Приоритет</th>
                 <th>Направление</th>
-                <th>Код</th>
-                <th>Школа</th>
                 <th>Мест</th>
-                <th>Прошлый проходной</th>
                 <th>Осн. без чужих выше</th>
+                <th>Осн. без высшего и согласий</th>
                 <th>Проходной осн. без чужих</th>
                 <th>Высший выше</th>
                 <th>Проходной высший</th>
@@ -170,12 +168,10 @@
       </div>
     `;
 
-    document.querySelector(".summary-table thead tr th:nth-child(7)")
-      ?.insertAdjacentHTML("afterend", "<th>Осн. без высшего и согласий</th>");
-
     const checkbox = document.getElementById("onlyAnyaPriorities");
     checkbox.addEventListener("change", () => paintSummaryRows(rows, checkbox.checked));
-    paintSummaryRows(rows, false);
+    checkbox.checked = true;
+    paintSummaryRows(rows, true);
   }
 
   function paintSummaryRows(rows, onlyAnyaPriorities) {
@@ -184,10 +180,7 @@
       <tr>
         <td>${fmt(row.priority)}</td>
         <td><a class="route-link" href="#/direction/${encodeURIComponent(row.key)}">${escapeHtml(row.direction)}</a></td>
-        <td>${escapeHtml(row.code || "")}</td>
-        <td>${escapeHtml(row.school || "")}</td>
         <td>${fmt(row.places)}</td>
-        ${scoreCell(row.previousCutoff)}
         <td>${fmt(row.mainAbove)}</td>
         <td>${fmt(row.mainWithoutHighNoConsent)}</td>
         ${scoreCell(row.mainCutoff)}
@@ -196,7 +189,7 @@
         <td>${fmt(row.anyaRank)}</td>
         <td>${fmt(row.anyaScore)}</td>
       </tr>
-    `).join("") || `<tr><td colspan="12" class="empty">Ничего не найдено</td></tr>`;
+    `).join("") || `<tr><td colspan="10" class="empty">Ничего не найдено</td></tr>`;
   }
 
   function metric(label, value, note) {
