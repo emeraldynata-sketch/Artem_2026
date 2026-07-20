@@ -134,10 +134,10 @@
 
     summaryView.innerHTML = `
       <div class="cards">
-        ${metric("Направлений", data.directions.length, "полный общий конкурс МФТИ")}
-        ${metric("Строк в списках", data.totalRows, "обогащенные CSV")}
-        ${metric("Мин. основной без чужих", bestMain ? bestMain.mainCutoff : "", bestMain ? bestMain.direction : "")}
-        ${metric("Мин. высший проходной", bestConsent ? bestConsent.highCutoff : "", bestConsent ? bestConsent.direction : "")}
+        ${metric("Направления МФТИ", data.directions.length, "полный общий конкурс", "Сколько полных конкурсных списков МФТИ участвует в расчете.")}
+        ${metric("Строки в списках", data.totalRows, "после обогащения", "Общее число строк во всех загруженных направлениях.")}
+        ${metric("Лучшая отсечка: основной без чужих", bestMain ? bestMain.mainCutoff : "", bestMain ? bestMain.direction : "", "Минимальный проходной балл среди направлений по модели основного приоритета, исключая известных абитуриентов с согласием в другом вузе.")}
+        ${metric("Лучшая отсечка: высший проходной", bestConsent ? bestConsent.highCutoff : "", bestConsent ? bestConsent.direction : "", "Минимальный проходной балл среди направлений по модели приказа: учитываются только согласия и прохождение по приоритетам.")}
       </div>
       <div class="panel">
         <div class="panel-header">
@@ -152,7 +152,9 @@
               <tr>
                 <th>Приоритет</th>
                 <th>Направление</th>
+                <th>Школа</th>
                 <th>Мест</th>
+                <th>Прошлый проходной</th>
                 <th>Осн. без чужих выше</th>
                 <th>Осн. без высшего и согласий</th>
                 <th>Проходной осн. без чужих</th>
@@ -180,7 +182,9 @@
       <tr>
         <td>${fmt(row.priority)}</td>
         <td><a class="route-link" href="#/direction/${encodeURIComponent(row.key)}">${escapeHtml(row.direction)}</a></td>
+        <td>${escapeHtml(row.school || "")}</td>
         <td>${fmt(row.places)}</td>
+        ${scoreCell(row.previousCutoff)}
         <td>${fmt(row.mainAbove)}</td>
         <td>${fmt(row.mainWithoutHighNoConsent)}</td>
         ${scoreCell(row.mainCutoff)}
@@ -189,15 +193,17 @@
         <td>${fmt(row.anyaRank)}</td>
         <td>${fmt(row.anyaScore)}</td>
       </tr>
-    `).join("") || `<tr><td colspan="10" class="empty">Ничего не найдено</td></tr>`;
+    `).join("") || `<tr><td colspan="12" class="empty">Ничего не найдено</td></tr>`;
   }
 
-  function metric(label, value, note) {
+  function metric(label, value, note, detail) {
+    const help = detail || note || label;
     return `
-      <div class="metric">
+      <div class="metric" title="${escapeHtml(help)}">
         <div class="metric-label">${escapeHtml(label)}</div>
         <div class="metric-value">${escapeHtml(value)}</div>
         <div class="metric-note">${escapeHtml(note || "")}</div>
+        ${detail ? `<div class="metric-detail">${escapeHtml(detail)}</div>` : ""}
       </div>
     `;
   }
@@ -215,10 +221,10 @@
 
     directionView.innerHTML = `
       <div class="cards">
-        ${metric("Основной выше", direction.mainAbove, `проходной ${fmt(direction.mainCutoff)}`)}
-        ${metric("Без согласий в других", direction.mainWithoutOtherConsents, `проходной ${fmt(direction.mainWithoutOtherCutoff)}`)}
-        ${metric("Высший выше", direction.highAbove, `проходной ${fmt(direction.highCutoff)}`)}
-        ${metric("Артем", anya ? `№ ${fmt(anya["№"])}` : "не найден", anya ? `балл ${fmt(anya["Сумма баллов с БВИ"])}` : "")}
+        ${metric("Основной приоритет выше Артема и с таким же баллом", direction.mainAbove, `отсечка ${fmt(direction.mainCutoff)}`, "Сколько абитуриентов с баллом Артема и выше получают это направление по расчету основного приоритета внутри МФТИ.")}
+        ${metric("Основной без чужих согласий", direction.mainWithoutOtherConsents, `отсечка ${fmt(direction.mainWithoutOtherCutoff)}`, "То же, но исключены абитуриенты, у которых известно согласие в МИФИ или Бауманке.")}
+        ${metric("Высший проходной выше Артема и с таким же баллом", direction.highAbove, `отсечка ${fmt(direction.highCutoff)}`, "Сколько абитуриентов с баллом Артема и выше проходят в модель текущего приказа: есть согласие и направление является высшим проходным.")}
+        ${metric("Артем в этом списке", anya ? `№ ${fmt(anya["№"])}` : "не найден", anya ? `балл ${fmt(anya["Сумма баллов с БВИ"])}` : "", "Позиция и расчетный балл Артема в текущем конкурсном списке.")}
       </div>
       <div class="panel">
         <div class="panel-header">
@@ -252,7 +258,7 @@
     `;
 
     document.querySelector("#directionView .cards .metric:nth-child(2)")
-      ?.insertAdjacentHTML("afterend", metric("Осн. без высшего и согласий", direction.mainWithoutHighNoConsent, "выше Артема"));
+      ?.insertAdjacentHTML("afterend", metric("Осн. без высшего и без согласий", direction.mainWithoutHighNoConsent, "балл Артема и выше", "Абитуриенты с основным приоритетом, без высшего проходного и без известного согласия, чей расчетный балл не ниже балла Артема."));
 
     const select = document.getElementById("rowFilter");
     const prioritySelect = document.getElementById("priorityFilter");
