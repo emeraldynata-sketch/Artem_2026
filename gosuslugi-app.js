@@ -208,7 +208,7 @@
 
     directionView.innerHTML = `
       <div class="cards">
-        ${metric(`Основной выше ${data.applicantName} с учетом ИД`, direction.mainAbove, `отсечка ${fmt(direction.mainCutoff)}`, "Сколько абитуриентов выше расчетной позиции получают это направление по модели основного приоритета.")}
+        ${metric(`Основной выше ${data.applicantName} с учетом ИД`, direction.mainClassicAbove ?? direction.mainAbove, `отсечка ${fmt(direction.mainClassicCutoff ?? direction.mainCutoff)}`, "Сколько абитуриентов выше расчетной позиции получают это направление по модели основного приоритета.")}
         ${metric("Основной без чужих согласий", direction.mainWithoutOtherConsents, `отсечка ${fmt(direction.mainWithoutOtherCutoff)}`, "То же, но исключены абитуриенты, у которых известно согласие в другом вузе.")}
         ${metric(`Высший проходной выше ${data.applicantName} с учетом ИД`, direction.highAbove, `отсечка ${fmt(direction.highCutoff)}`, "Сколько абитуриентов выше расчетной позиции проходят в модель текущего приказа: есть согласие и направление является высшим проходным.")}
         ${metric(`${data.applicantName} в этом списке`, applicant ? `№ ${fmt(applicant["Порядковый номер"])}` : "не найден", applicant ? `балл ${fmt(applicant["Сумма баллов с БВИ"] || applicant["Сумма баллов"])}` : "", `Позиция и расчетный балл ${data.applicantName} в текущем конкурсном списке.`)}
