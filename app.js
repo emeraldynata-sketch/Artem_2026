@@ -226,6 +226,12 @@
         ${metric("Высший проходной выше Артема и с таким же баллом", direction.highAbove, `отсечка ${fmt(direction.highCutoff)}`, "Сколько абитуриентов с баллом Артема и выше проходят в модель текущего приказа: есть согласие и направление является высшим проходным.")}
         ${metric("Артем в этом списке", anya ? `№ ${fmt(anya["№"])}` : "не найден", anya ? `балл ${fmt(anya["Сумма баллов с БВИ"])}` : "", "Позиция и расчетный балл Артема в текущем конкурсном списке.")}
       </div>
+      <div class="cards scenario-cards">
+        ${metric("Сценарий мест +10%", direction.placesPlus10 || "", `было ${fmt(direction.places)}`, "Модельный сценарий: количество мест увеличено на 10% с округлением вверх.")}
+        ${metric("Осн. без чужих +10%", direction.mainWithoutOtherConsentsPlus10, `отсечка ${fmt(direction.mainWithoutOtherCutoffPlus10)}`, "Основной приоритет без известных чужих согласий при увеличенном числе мест.")}
+        ${metric("Высший проходной +10%", direction.highAbovePlus10, `отсечка ${fmt(direction.highCutoffPlus10)}`, "Высший проходной при увеличенном числе мест.")}
+        ${metric("Осн. без высш. и согл. +10%", direction.mainWithoutHighNoConsentPlus10, "балл Артема и выше", "Абитуриенты с основным приоритетом, без высшего проходного и без известного согласия при увеличенном числе мест.")}
+      </div>
       <div class="panel">
         <div class="panel-header">
           <div class="panel-title">Обогащенный список</div>

@@ -82,6 +82,10 @@
     return `<span class="badge ${cls}">${escapeHtml(value || "нет")}</span>`;
   }
 
+  function applicantCode(row) {
+    return String(row["ID участника"] || row["Код поступающего"] || "");
+  }
+
   function metric(label, value, note, detail) {
     const help = detail || note || label;
     return `
@@ -199,7 +203,7 @@
   function renderDirection(direction, search) {
     pageTitle.textContent = direction.shortName;
     pageSubtitle.textContent = `Приоритет ${fmt(direction.priority)} · мест ${fmt(direction.places)} · файл ${direction.fileName}`;
-    const applicant = direction.rows.find((row) => String(row["ID участника"]) === applicantId);
+    const applicant = direction.rows.find((row) => applicantCode(row) === applicantId);
     const priorities = priorityOptions(direction.rows);
 
     directionView.innerHTML = `
@@ -208,6 +212,12 @@
         ${metric("Основной без чужих согласий", direction.mainWithoutOtherConsents, `отсечка ${fmt(direction.mainWithoutOtherCutoff)}`, "То же, но исключены абитуриенты, у которых известно согласие в другом вузе.")}
         ${metric(`Высший проходной выше ${data.applicantName} с учетом ИД`, direction.highAbove, `отсечка ${fmt(direction.highCutoff)}`, "Сколько абитуриентов выше расчетной позиции проходят в модель текущего приказа: есть согласие и направление является высшим проходным.")}
         ${metric(`${data.applicantName} в этом списке`, applicant ? `№ ${fmt(applicant["Порядковый номер"])}` : "не найден", applicant ? `балл ${fmt(applicant["Сумма баллов с БВИ"] || applicant["Сумма баллов"])}` : "", `Позиция и расчетный балл ${data.applicantName} в текущем конкурсном списке.`)}
+      </div>
+      <div class="cards scenario-cards">
+        ${metric("Сценарий мест +10%", direction.placesPlus10 || "", `было ${fmt(direction.places)}`, "Модельный сценарий: количество мест увеличено на 10% с округлением вверх.")}
+        ${metric("Осн. без чужих +10%", direction.mainWithoutOtherConsentsPlus10, `отсечка ${fmt(direction.mainWithoutOtherCutoffPlus10)}`, "Основной приоритет без известных чужих согласий при увеличенном числе мест.")}
+        ${metric("Высший проходной +10%", direction.highAbovePlus10, `отсечка ${fmt(direction.highCutoffPlus10)}`, "Высший проходной при увеличенном числе мест.")}
+        ${metric("Осн. без высш. и согл. +10%", direction.mainWithoutHighNoConsentPlus10, `выше ${data.applicantName}`, "Абитуриенты с основным приоритетом, без высшего проходного и без известного согласия при увеличенном числе мест.")}
       </div>
       <div class="panel">
         <div class="panel-header">
@@ -301,7 +311,7 @@
     if (counter) counter.textContent = `Строк: ${rows.length} из ${direction.rows.length}`;
 
     document.getElementById("directionRows").innerHTML = rows.map((row, index) => `
-      <tr class="${String(row["ID участника"]) === applicantId ? "anya-row" : ""}">
+      <tr class="${applicantCode(row) === applicantId ? "anya-row" : ""}">
         <td class="row-index">${index + 1}</td>
         ${direction.columns.map((col) => {
           const value = row[col];
