@@ -172,7 +172,7 @@
                 <th>Проходной<br>осн. без чужих</th>
                 <th>Высший<br>выше</th>
                 <th>Проходной<br>высший</th>
-                <th>${escapeHtml(data.applicantName)}<br>№</th>
+                <th>Проходной<br>высш. +10%</th>
                 <th>${escapeHtml(data.applicantName)}<br>балл</th>
                 <th>Статус</th>
               </tr>
@@ -188,7 +188,7 @@
                   ${scoreCell(row.mainCutoff)}
                   <td>${fmt(row.highAbove)}</td>
                   ${scoreCell(row.highCutoff)}
-                  <td>${fmt(row.applicantRank)}</td>
+                  ${scoreCell(row.highCutoffPlus10)}
                   <td>${fmt(row.applicantScore)}</td>
                   <td>${escapeHtml(row.applicantStatus || "")}</td>
                 </tr>
@@ -216,8 +216,8 @@
       <div class="cards scenario-cards">
         ${metric("Сценарий мест +10%", direction.placesPlus10 || "", `было ${fmt(direction.places)}`, "Модельный сценарий: количество мест увеличено на 10% с округлением вверх.")}
         ${metric("Осн. без чужих +10%", direction.mainWithoutOtherConsentsPlus10, `отсечка ${fmt(direction.mainWithoutOtherCutoffPlus10)}`, "Основной приоритет без известных чужих согласий при увеличенном числе мест.")}
-        ${metric("Высший проходной +10%", direction.highAbovePlus10, `отсечка ${fmt(direction.highCutoffPlus10)}`, "Высший проходной при увеличенном числе мест.")}
         ${metric("Осн. без высш. и согл. +10%", direction.mainWithoutHighNoConsentPlus10, `выше ${data.applicantName}`, "Абитуриенты с основным приоритетом, без высшего проходного и без известного согласия при увеличенном числе мест.")}
+        ${metric("Высший проходной +10%", direction.highAbovePlus10, `отсечка ${fmt(direction.highCutoffPlus10)}`, "Высший проходной при увеличенном числе мест.")}
       </div>
       <div class="panel">
         <div class="panel-header">
