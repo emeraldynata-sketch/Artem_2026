@@ -160,7 +160,7 @@
                 <th>Проходной<br>осн. без чужих</th>
                 <th>Высший<br>выше</th>
                 <th>Проходной<br>высший</th>
-                <th>Проходной<br>высш. +10%</th>
+                <th>Проходной<br>предв. МФТИ</th>
                 <th>Артем<br>балл</th>
               </tr>
             </thead>
@@ -227,10 +227,10 @@
         ${metric("Артем в этом списке", anya ? `№ ${fmt(anya["№"])}` : "не найден", anya ? `балл ${fmt(anya["Сумма баллов с БВИ"])}` : "", "Позиция и расчетный балл Артема в текущем конкурсном списке.")}
       </div>
       <div class="cards scenario-cards">
-        ${metric("Сценарий мест +10%", direction.placesPlus10 || "", `было ${fmt(direction.places)}`, "Модельный сценарий: количество мест увеличено на 10% с округлением вверх.")}
-        ${metric("Осн. без чужих +10%", direction.mainWithoutOtherConsentsPlus10, `отсечка ${fmt(direction.mainWithoutOtherCutoffPlus10)}`, "Основной приоритет без известных чужих согласий при увеличенном числе мест.")}
-        ${metric("Осн. без высш. и согл. +10%", direction.mainWithoutHighNoConsentPlus10, "балл Артема и выше", "Абитуриенты с основным приоритетом, без высшего проходного и без известного согласия при увеличенном числе мест.")}
-        ${metric("Высший проходной +10%", direction.highAbovePlus10, `отсечка ${fmt(direction.highCutoffPlus10)}`, "Высший проходной при увеличенном числе мест.")}
+        ${metric("Мест по предв. МФТИ", direction.placesPlus10 || "", `база ${fmt(direction.places)}`, "Число общих мест из файла МФТИ с предварительным расчетом приоритетов.")}
+        ${metric("Осн. без чужих по МФТИ", direction.mainWithoutOtherConsentsPlus10, `отсечка ${fmt(direction.mainWithoutOtherCutoffPlus10)}`, "Основной приоритет без известных чужих согласий по предварительным местам МФТИ.")}
+        ${metric("Осн. без высш. и согл. по МФТИ", direction.mainWithoutHighNoConsentPlus10, "балл Артема и выше", "Абитуриенты с основным приоритетом, без высшего проходного и без известного согласия по предварительным местам МФТИ.")}
+        ${metric("Высший проходной по МФТИ", direction.highAbovePlus10, `отсечка ${fmt(direction.highCutoffPlus10)}`, "Высший проходной по предварительным местам МФТИ.")}
       </div>
       <div class="panel">
         <div class="panel-header">
