@@ -39,6 +39,14 @@
     return String(value || "").trim().toLowerCase() === "да";
   }
 
+  function scenarioFlag(row, scenarioColumn, baseColumn) {
+    const scenarioValue = row[scenarioColumn];
+    if (scenarioValue !== undefined && String(scenarioValue || "").trim() !== "") {
+      return scenarioValue;
+    }
+    return row[baseColumn];
+  }
+
   function num(value) {
     const parsed = Number(String(value || "").replace(",", "."));
     return Number.isFinite(parsed) ? parsed : null;
@@ -80,6 +88,7 @@
       .replaceAll(" без согласий ", "<br>без согласий ")
       .replaceAll(" высший ", "<br>высший ")
       .replaceAll(" основной ", "<br>основной ")
+      .replaceAll(" предварительный ", "<br>предварительный ")
       .replaceAll(" назначенный ", "<br>назначенный ");
   }
 
@@ -126,7 +135,7 @@
 
   function renderSummary(search) {
     pageTitle.textContent = "Свод";
-    pageSubtitle.textContent = `Код Артема ${applicantId}. Порог сравнения в своде: больше ${data.scoreThreshold}.`;
+    pageSubtitle.textContent = `Код Ани ${applicantId}. Порог сравнения в своде: больше ${data.scoreThreshold}.`;
 
     const rows = summaryRows(search);
     const bestMain = rows.filter((row) => num(row.mainCutoff) !== null).sort((a, b) => num(a.mainCutoff) - num(b.mainCutoff))[0];
@@ -143,25 +152,25 @@
         <div class="panel-header">
           <div class="panel-title">Свод по направлениям</div>
           <div class="toolbar">
-            <label><input type="checkbox" id="onlyAnyaPriorities"> только приоритеты Артема</label>
+            <label><input type="checkbox" id="onlyAnyaPriorities"> только приоритеты Ани</label>
           </div>
         </div>
         <div class="table-wrap">
           <table class="summary-table">
             <thead>
               <tr>
-                <th>Прио-<br>ритет</th>
-                <th>Направ-<br>ление</th>
-                <th>Шко-<br>ла</th>
+                <th>Приоритет</th>
+                <th>Направление</th>
+                <th>Код</th>
+                <th>Школа</th>
                 <th>Мест</th>
-                <th>Прошлый<br>проходной</th>
-                <th>Осн. без<br>чужих</th>
-                <th>Осн. без<br>высш. и согл.</th>
-                <th>Проходной<br>осн. без чужих</th>
-                <th>Высший<br>выше</th>
-                <th>Проходной<br>высший</th>
+                <th>Прошлый проходной</th>
+                <th>Осн. без чужих выше</th>
+                <th>Проходной осн. без чужих</th>
+                <th>Высший выше</th>
+                <th>Проходной высший</th>
                 <th>Проходной<br>предв. МФТИ</th>
-                <th>Артем<br>балл</th>
+                <th>Аня балл</th>
               </tr>
             </thead>
             <tbody id="summaryRows"></tbody>
@@ -170,10 +179,12 @@
       </div>
     `;
 
+    document.querySelector(".summary-table thead tr th:nth-child(7)")
+      ?.insertAdjacentHTML("afterend", "<th>Осн. без высшего и согласий</th>");
+
     const checkbox = document.getElementById("onlyAnyaPriorities");
     checkbox.addEventListener("change", () => paintSummaryRows(rows, checkbox.checked));
-    checkbox.checked = true;
-    paintSummaryRows(rows, true);
+    paintSummaryRows(rows, false);
   }
 
   function paintSummaryRows(rows, onlyAnyaPriorities) {
@@ -182,6 +193,7 @@
       <tr>
         <td>${fmt(row.priority)}</td>
         <td><a class="route-link" href="#/direction/${encodeURIComponent(row.key)}">${escapeHtml(row.direction)}</a></td>
+        <td>${escapeHtml(row.code || "")}</td>
         <td>${escapeHtml(row.school || "")}</td>
         <td>${fmt(row.places)}</td>
         ${scoreCell(row.previousCutoff)}
@@ -193,7 +205,7 @@
         ${scoreCell(row.highCutoffPlus10)}
         <td>${fmt(row.anyaScore)}</td>
       </tr>
-    `).join("") || `<tr><td colspan="12" class="empty">Ничего не найдено</td></tr>`;
+    `).join("") || `<tr><td colspan="13" class="empty">Ничего не найдено</td></tr>`;
   }
 
   function metric(label, value, note, detail) {
@@ -221,15 +233,15 @@
 
     directionView.innerHTML = `
       <div class="cards">
-        ${metric("Основной приоритет выше Артема и с таким же баллом", direction.mainAbove, `отсечка ${fmt(direction.mainCutoff)}`, "Сколько абитуриентов с баллом Артема и выше получают это направление по расчету основного приоритета внутри МФТИ.")}
+        ${metric("Основной приоритет выше Ани и с таким же баллом", direction.mainAbove, `отсечка ${fmt(direction.mainCutoff)}`, "Сколько абитуриентов с баллом Ани и выше получают это направление по расчету основного приоритета внутри МФТИ.")}
         ${metric("Основной без чужих согласий", direction.mainWithoutOtherConsents, `отсечка ${fmt(direction.mainWithoutOtherCutoff)}`, "То же, но исключены абитуриенты, у которых известно согласие в МИФИ или Бауманке.")}
-        ${metric("Высший проходной выше Артема и с таким же баллом", direction.highAbove, `отсечка ${fmt(direction.highCutoff)}`, "Сколько абитуриентов с баллом Артема и выше проходят в модель текущего приказа: есть согласие и направление является высшим проходным.")}
-        ${metric("Артем в этом списке", anya ? `№ ${fmt(anya["№"])}` : "не найден", anya ? `балл ${fmt(anya["Сумма баллов с БВИ"])}` : "", "Позиция и расчетный балл Артема в текущем конкурсном списке.")}
+        ${metric("Высший проходной выше Ани и с таким же баллом", direction.highAbove, `отсечка ${fmt(direction.highCutoff)}`, "Сколько абитуриентов с баллом Ани и выше проходят в модель текущего приказа: есть согласие и направление является высшим проходным.")}
+        ${metric("Аня в этом списке", anya ? `№ ${fmt(anya["№"])}` : "не найдена", anya ? `балл ${fmt(anya["Сумма баллов с БВИ"])}` : "", "Позиция и расчетный балл Ани в текущем конкурсном списке.")}
       </div>
       <div class="cards scenario-cards">
         ${metric("Мест по предв. МФТИ", direction.placesPlus10 || "", `база ${fmt(direction.places)}`, "Число общих мест из файла МФТИ с предварительным расчетом приоритетов.")}
         ${metric("Осн. без чужих по МФТИ", direction.mainWithoutOtherConsentsPlus10, `отсечка ${fmt(direction.mainWithoutOtherCutoffPlus10)}`, "Основной приоритет без известных чужих согласий по предварительным местам МФТИ.")}
-        ${metric("Осн. без высш. и согл. по МФТИ", direction.mainWithoutHighNoConsentPlus10, "балл Артема и выше", "Абитуриенты с основным приоритетом, без высшего проходного и без известного согласия по предварительным местам МФТИ.")}
+        ${metric("Осн. без высш. и согл. по МФТИ", direction.mainWithoutHighNoConsentPlus10, "балл Ани и выше", "Абитуриенты с основным приоритетом, без высшего проходного и без известного согласия по предварительным местам МФТИ.")}
         ${metric("Высший проходной по МФТИ", direction.highAbovePlus10, `отсечка ${fmt(direction.highCutoffPlus10)}`, "Высший проходной по предварительным местам МФТИ.")}
       </div>
       <div class="panel">
@@ -264,7 +276,7 @@
     `;
 
     document.querySelector("#directionView .cards .metric:nth-child(2)")
-      ?.insertAdjacentHTML("afterend", metric("Осн. без высшего и без согласий", direction.mainWithoutHighNoConsent, "балл Артема и выше", "Абитуриенты с основным приоритетом, без высшего проходного и без известного согласия, чей расчетный балл не ниже балла Артема."));
+      ?.insertAdjacentHTML("afterend", metric("Осн. без высшего и без согласий", direction.mainWithoutHighNoConsent, "балл Ани и выше", "Абитуриенты с основным приоритетом, без высшего проходного и без известного согласия, чей расчетный балл не ниже балла Ани."));
 
     const select = document.getElementById("rowFilter");
     const prioritySelect = document.getElementById("priorityFilter");
@@ -311,9 +323,9 @@
 
   function filterDirectionRows(rows, search, filter, priorityFilter = "all") {
     return rows.filter((row) => {
-      if (filter === "main" && !yes(row["МФТИ_full_расчет_основной_приоритет"])) return false;
-      if (filter === "mainNoOther" && !yes(row["МФТИ_full_основной_без_согласий_в_других_вузах"])) return false;
-      if (filter === "highest" && !yes(row["МФТИ_full_расчет_высший_проходной_приоритет"])) return false;
+      if (filter === "main" && !yes(scenarioFlag(row, "МФТИ_full_предварительный_основной_приоритет", "МФТИ_full_расчет_основной_приоритет"))) return false;
+      if (filter === "mainNoOther" && !yes(scenarioFlag(row, "МФТИ_full_предварительный_основной_без_согласий_в_других_вузах", "МФТИ_full_основной_без_согласий_в_других_вузах"))) return false;
+      if (filter === "highest" && !yes(scenarioFlag(row, "МФТИ_full_предварительный_высший_проходной_приоритет", "МФТИ_full_расчет_высший_проходной_приоритет"))) return false;
       if (filter === "consent" && !yes(row["Согласие_есть_в_наших_выгрузках"]) && !yes(row["Согласие МФТИ сайт"])) return false;
       if (filter === "bvi" && !yes(row["БВИ в этом конкурсе"])) return false;
       if (priorityFilter !== "all" && String(row["Приоритет"]) !== String(priorityFilter)) return false;
@@ -334,7 +346,7 @@
         <td class="row-index">${index + 1}</td>
         ${direction.columns.map((col) => {
           const value = row[col];
-          if (["МФТИ_full_расчет_основной_приоритет", "МФТИ_full_основной_без_согласий_в_других_вузах", "МФТИ_full_расчет_высший_проходной_приоритет", "Согласие_МФТИ_госуслуги", "Согласие_МИФИ_госуслуги", "Согласие_Баумана_госуслуги", "БВИ в этом конкурсе"].includes(col)) {
+          if (["МФТИ_full_расчет_основной_приоритет", "МФТИ_full_основной_без_согласий_в_других_вузах", "МФТИ_full_расчет_высший_проходной_приоритет", "МФТИ_full_предварительный_основной_приоритет", "МФТИ_full_предварительный_основной_без_согласий_в_других_вузах", "МФТИ_full_предварительный_высший_проходной_приоритет", "Согласие_МФТИ_госуслуги", "Согласие_МИФИ_госуслуги", "Согласие_Баумана_госуслуги", "БВИ в этом конкурсе"].includes(col)) {
             return `<td>${badge(value)}</td>`;
           }
           return `<td>${escapeHtml(value)}</td>`;
