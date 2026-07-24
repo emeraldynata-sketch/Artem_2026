@@ -181,8 +181,7 @@
 
     const checkbox = document.getElementById("onlyAnyaPriorities");
     checkbox.addEventListener("change", () => paintSummaryRows(rows, checkbox.checked));
-    checkbox.checked = true;
-    paintSummaryRows(rows, true);
+    paintSummaryRows(rows, false);
   }
 
   function paintSummaryRows(rows, onlyAnyaPriorities) {
